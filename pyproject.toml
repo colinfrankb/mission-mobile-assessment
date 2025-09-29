@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "json-redactor"
+version = "1.0.0"
+
+[project.scripts]
+json-redactor = "json_redactor.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
