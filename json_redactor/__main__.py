@@ -1,7 +1,10 @@
 import argparse
 import sys
 
-from json_redactor.utils import hash_redactor, mask_redactor, key_matcher, redact_json, regex_key_matcher
+from json_redactor.key_matchers import exact_key_matcher, regex_key_matcher
+from json_redactor.redactors import hash_redactor, mask_redactor
+from json_redactor.utils import redact_json
+
 
 def not_none(value):
     return not value == None
@@ -27,11 +30,11 @@ def main():
         with open(args.key_file, "r") as key_file:
             possible_keys = key_file.readline()
             if possible_keys:
-                keys = key_matcher(possible_keys.split(","))
+                key_matcher = exact_key_matcher(possible_keys.split(","))
     elif args.keys:
-        keys = key_matcher(args.keys.split(","))
+        key_matcher = exact_key_matcher(args.keys.split(","))
     elif args.keys_regex:
-        keys = regex_key_matcher(args.keys_regex)
+        key_matcher = regex_key_matcher(args.keys_regex)
     else:
         parser.error("One of --keys, --key-file or --keys-regex is required")
 
@@ -41,12 +44,13 @@ def main():
         redactor = hash_redactor
     else:
         parser.error("One of --mask or --hash is required")
-
+    
+    
     if not sys.stdin.isatty():
-        redact_json(sys.stdin.buffer, keys, redactor)
+        redact_json(sys.stdin.buffer, key_matcher, redactor)
     elif args.file:
         with open(args.file, "rb") as file:
-            redact_json(file, keys, redactor)
+            redact_json(file, key_matcher, redactor)
     else:
         parser.error("No file set or piped in.")
 
